@@ -10,6 +10,7 @@ from sklearn.metrics import confusion_matrix, classification_report, accuracy_sc
 from PIL import Image
 import pandas as pd
 import os
+import gdown
 
 # Parámetros
 width_shape = 224
@@ -44,15 +45,23 @@ def preprocess_image(img, target_size=(width_shape, height_shape)):
     img_array = preprocess_input(img_array)
     return img_array
 
+# Descargar modelo automáticamente desde Google Drive
+model_path = "modelo.keras"
+file_id = "1TCEGlUGMV5sqUolo9UFK4PaD6IeSs--W"
+url = f"https://drive.google.com/uc?id={file_id}"
+
+if not os.path.exists(model_path):
+    with st.spinner("Descargando modelo desde Google Drive, espera..."):
+        gdown.download(url, model_path, quiet=False)
+
 # Interfaz
 st.title("🦜 Clasificador y Evaluador de Aves")
 
-# -- OPCIÓN 1 para cargar modelo: subir archivo --
-uploaded_model = st.file_uploader("Sube el modelo .keras", type=["keras"])
 model = None
 
+# -- OPCIÓN 1 para cargar modelo: subir archivo --
+uploaded_model = st.file_uploader("Sube el modelo .keras", type=["keras"])
 if uploaded_model is not None:
-    # Guardar temporalmente el archivo subido
     with open("temp_model.keras", "wb") as f:
         f.write(uploaded_model.getbuffer())
     model = load_model_cached("temp_model.keras")
@@ -60,13 +69,19 @@ if uploaded_model is not None:
 
 # -- OPCIÓN 2 para cargar modelo: poner ruta manual --
 if model is None:
-    model_path = st.text_input("O escribe la ruta del modelo .keras", value="")
-    if model_path:
-        if os.path.exists(model_path):
-            model = load_model_cached(model_path)
+    model_path_manual = st.text_input("O escribe la ruta del modelo .keras", value="")
+    if model_path_manual:
+        if os.path.exists(model_path_manual):
+            model = load_model_cached(model_path_manual)
             st.success("Modelo cargado correctamente desde ruta.")
         else:
             st.warning("No se encontró el archivo en la ruta especificada.")
+
+# -- OPCIÓN 3: cargar modelo descargado automáticamente --
+if model is None:
+    if os.path.exists(model_path):
+        model = load_model_cached(model_path)
+        st.success("Modelo cargado correctamente desde Google Drive.")
 
 if model is None:
     st.warning("Por favor sube un modelo o escribe la ruta correcta para continuar.")
