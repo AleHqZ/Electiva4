@@ -49,7 +49,7 @@ def preprocess_image(img, target_size=(width_shape, height_shape)):
 st.title("🦜 Clasificador y Evaluador de Aves")
 
 # Cargar modelo
-model_path = st.text_input("Ruta del modelo .keras", value=r"C:/Users/ronal/Desktop/dataset/Aves/models/model_VGG16_v2_os.keras")
+model_path = st.text_input("Ruta del modelo .keras", value=r"model_VGG16_v2_os.keras")
 if not os.path.exists(model_path):
     st.warning("Escribe la ruta correcta del modelo .keras para continuar")
     st.stop()
