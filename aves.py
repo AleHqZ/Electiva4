@@ -47,17 +47,33 @@ def preprocess_image(img, target_size=(width_shape, height_shape)):
 # Interfaz
 st.title("🦜 Clasificador y Evaluador de Aves")
 
-# Cargar modelo
-model_path = st.text_input("Ruta del modelo .keras", value=r"model_VGG16_v2_os.keras")
-if not os.path.exists(model_path):
-    st.warning("Escribe la ruta correcta del modelo .keras para continuar")
+# -- OPCIÓN 1 para cargar modelo: subir archivo --
+uploaded_model = st.file_uploader("Sube el modelo .keras", type=["keras"])
+model = None
+
+if uploaded_model is not None:
+    # Guardar temporalmente el archivo subido
+    with open("temp_model.keras", "wb") as f:
+        f.write(uploaded_model.getbuffer())
+    model = load_model_cached("temp_model.keras")
+    st.success("Modelo cargado correctamente desde archivo subido.")
+
+# -- OPCIÓN 2 para cargar modelo: poner ruta manual --
+if model is None:
+    model_path = st.text_input("O escribe la ruta del modelo .keras", value="")
+    if model_path:
+        if os.path.exists(model_path):
+            model = load_model_cached(model_path)
+            st.success("Modelo cargado correctamente desde ruta.")
+        else:
+            st.warning("No se encontró el archivo en la ruta especificada.")
+
+if model is None:
+    st.warning("Por favor sube un modelo o escribe la ruta correcta para continuar.")
     st.stop()
 
-model = load_model_cached(model_path)
-st.success("Modelo cargado correctamente")
-
 # Cargar Excel con info de aves
-excel_path = r"aves_info_completo.xlsx"
+excel_path = st.text_input("Ruta del archivo Excel con información de aves", value=r"C:/Users/ronal/Desktop/dataset/aves_info_completo.xlsx")
 if not os.path.exists(excel_path):
     st.warning("No se encontró el archivo Excel con la información de las aves.")
     st.stop()
