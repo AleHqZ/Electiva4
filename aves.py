@@ -1,8 +1,6 @@
 import streamlit as st
 from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array
-from tensorflow.keras.preprocessing import image
-from keras.applications.imagenet_utils import preprocess_input
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array, preprocess_input
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -10,6 +8,7 @@ from sklearn.metrics import confusion_matrix, classification_report, accuracy_sc
 from PIL import Image
 import pandas as pd
 import os
+
 
 # Parámetros
 width_shape = 224
