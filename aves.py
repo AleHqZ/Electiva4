@@ -120,7 +120,7 @@ if option == "Clasificar imagen individual":
 
 # Opción 2: Evaluar conjunto de test
 elif option == "Evaluar conjunto de test":
-    test_data_dir = st.text_input("Ruta del directorio de test (con subcarpetas por clase)", value=r"C:\Users\ronal\Desktop\dataset\Test")
+    test_data_dir = st.text_input("Ruta del directorio de test (con subcarpetas por clase)", value=r"Test")
     if test_data_dir and os.path.exists(test_data_dir):
         test_datagen = ImageDataGenerator()
         test_generator = test_datagen.flow_from_directory(
