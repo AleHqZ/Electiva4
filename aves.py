@@ -73,7 +73,7 @@ if model is None:
     st.stop()
 
 # Cargar Excel con info de aves
-excel_path = st.text_input("Ruta del archivo Excel con información de aves", value=r"C:/Users/ronal/Desktop/dataset/aves_info_completo.xlsx")
+excel_path = st.text_input("Ruta del archivo Excel con información de aves", value=r"aves_info_completo.xlsx")
 if not os.path.exists(excel_path):
     st.warning("No se encontró el archivo Excel con la información de las aves.")
     st.stop()
