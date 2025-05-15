@@ -1,7 +1,7 @@
 import streamlit as st
 from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array
-from tensorflow.keras.applications.resnet50 import preprocess_input  # Ajusta aquí según tu modelo
+from tensorflow.keras.preprocessing.image import img_to_array
+from tensorflow.keras.applications.resnet50 import preprocess_input  # Ajusta si usas otro modelo
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -9,8 +9,7 @@ from sklearn.metrics import confusion_matrix, classification_report, accuracy_sc
 from PIL import Image
 import pandas as pd
 import os
-
-
+import gdown  # pip install gdown si no lo tienes
 
 # Parámetros
 width_shape = 224
@@ -32,15 +31,17 @@ def load_model_cached(path):
     return load_model(path)
 
 @st.cache_data
-def load_bird_info(path):
-    df = pd.read_excel(path)
+def load_bird_info(df):
+    # Si df es path, carga Excel, si es DataFrame devuelve igual
+    if isinstance(df, str):
+        df = pd.read_excel(df)
     df.columns = df.columns.str.strip()  # Quitar espacios
     return df
 
 def preprocess_image(img, target_size=(width_shape, height_shape)):
     img = img.convert('RGB')
     img = img.resize(target_size)
-    img_array = image.img_to_array(img)
+    img_array = img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0)
     img_array = preprocess_input(img_array)
     return img_array
@@ -48,22 +49,29 @@ def preprocess_image(img, target_size=(width_shape, height_shape)):
 # Interfaz
 st.title("🦜 Clasificador y Evaluador de Aves")
 
-# Cargar modelo
-model_path = st.text_input("Ruta del modelo .keras", value=r"model_VGG16_v2_os.keras")
+# Descarga o pide ruta del modelo
+default_model_path = "model_VGG16_v2_os.keras"
+model_url = "https://drive.google.com/uc?id=TU_ID_DEL_MODELO"  # Pon aquí el link correcto
+
+if not os.path.exists(default_model_path):
+    with st.spinner("Descargando modelo..."):
+        gdown.download(model_url, default_model_path, quiet=False)
+
+model_path = st.text_input("Ruta del modelo .keras", value=default_model_path)
 if not os.path.exists(model_path):
-    st.warning("Escribe la ruta correcta del modelo .keras para continuar")
+    st.warning(f"No se encontró el archivo en: {model_path}")
     st.stop()
 
 model = load_model_cached(model_path)
 st.success("Modelo cargado correctamente")
 
-# Cargar Excel con info de aves
-excel_path = r"C:/Users/ronal/Desktop/dataset/aves_info_completo.xlsx"
-if not os.path.exists(excel_path):
-    st.warning("No se encontró el archivo Excel con la información de las aves.")
+# Cargar Excel con info de aves con uploader para más portabilidad
+uploaded_excel = st.file_uploader("Sube el archivo Excel con información de aves (.xlsx)", type=["xlsx"])
+if uploaded_excel is not None:
+    bird_info_df = load_bird_info(uploaded_excel)
+else:
+    st.warning("Sube el archivo Excel con la información de las aves para continuar.")
     st.stop()
-
-bird_info_df = load_bird_info(excel_path)
 
 # Opciones
 option = st.radio("Selecciona opción:", ("Clasificar imagen individual", "Evaluar conjunto de test"))
@@ -93,22 +101,22 @@ if option == "Clasificar imagen individual":
             st.markdown(f"**🍽️ Alimentación:** {ave_info['Alimentación']}")
             st.markdown(f"**⚠️ Estado de conservación:** {ave_info['Estado']}")
 
-            if pd.notna(ave_info['Busqueda_Google']):
+            if pd.notna(ave_info.get('Busqueda_Google')):
                 st.markdown(f"[🔍 Buscar en Google]({ave_info['Busqueda_Google']})")
 
             col1, col2 = st.columns(2)
             with col1:
-                if pd.notna(ave_info['Imagen_1']):
+                if pd.notna(ave_info.get('Imagen_1')):
                     st.image(ave_info['Imagen_1'], caption="Imagen 1", use_container_width=True)
             with col2:
-                if pd.notna(ave_info['Imagen_2']):
+                if pd.notna(ave_info.get('Imagen_2')):
                     st.image(ave_info['Imagen_2'], caption="Imagen 2", use_container_width=True)
         else:
             st.warning("No se encontró información en el Excel para esta especie.")
 
 # Opción 2: Evaluar conjunto de test
 elif option == "Evaluar conjunto de test":
-    test_data_dir = st.text_input("Ruta del directorio de test (con subcarpetas por clase)", value=r"C:\Users\ronal\Desktop\dataset\Test")
+    test_data_dir = st.text_input("Ruta del directorio de test (con subcarpetas por clase)")
     if test_data_dir and os.path.exists(test_data_dir):
         test_datagen = ImageDataGenerator()
         test_generator = test_datagen.flow_from_directory(
