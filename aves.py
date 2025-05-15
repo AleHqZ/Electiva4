@@ -1,6 +1,6 @@
 import streamlit as st
 from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array
 from tensorflow.keras.preprocessing import image
 from keras.applications.imagenet_utils import preprocess_input
 import numpy as np
