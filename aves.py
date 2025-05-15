@@ -57,7 +57,7 @@ model = load_model_cached(model_path)
 st.success("Modelo cargado correctamente")
 
 # Cargar Excel con info de aves
-excel_path = r"C:/Users/ronal/Desktop/dataset/aves_info_completo.xlsx"
+excel_path = r"aves_info_completo.xlsx"
 if not os.path.exists(excel_path):
     st.warning("No se encontró el archivo Excel con la información de las aves.")
     st.stop()
