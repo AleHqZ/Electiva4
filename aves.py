@@ -59,24 +59,6 @@ st.title("🦜 Clasificador y Evaluador de Aves")
 
 model = None
 
-# -- OPCIÓN 1 para cargar modelo: subir archivo --
-uploaded_model = st.file_uploader("Sube el modelo .keras", type=["keras"])
-if uploaded_model is not None:
-    with open("temp_model.keras", "wb") as f:
-        f.write(uploaded_model.getbuffer())
-    model = load_model_cached("temp_model.keras")
-    st.success("Modelo cargado correctamente desde archivo subido.")
-
-# -- OPCIÓN 2 para cargar modelo: poner ruta manual --
-if model is None:
-    model_path_manual = st.text_input("O escribe la ruta del modelo .keras", value="")
-    if model_path_manual:
-        if os.path.exists(model_path_manual):
-            model = load_model_cached(model_path_manual)
-            st.success("Modelo cargado correctamente desde ruta.")
-        else:
-            st.warning("No se encontró el archivo en la ruta especificada.")
-
 # -- OPCIÓN 3: cargar modelo descargado automáticamente --
 if model is None:
     if os.path.exists(model_path):
